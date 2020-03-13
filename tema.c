@@ -46,6 +46,9 @@ void delete_fs(Folder **root)
 void touch(Folder *you, char input)
 {
     char *p,*nume,*text;
+    p = strtok(input," ");
+    nume = strtok(NULL," ");
+    text = strtok(NULL," ");
 }
 int main()
 {
