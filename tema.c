@@ -166,6 +166,49 @@ void pwd(Folder *you)
         printf("/%s",you->data.name);
     }
 }
+void rm(Fisier **head, char *argument)
+{
+    Fisier *i = *head;
+    while(i != NULL && strcmp(i->data.name,argument) != 0)
+    {
+        i = i->next;
+    }
+    if(i == NULL)
+    {
+        printf("Cannot remove %s: No such file!",argument);
+    }
+    else
+    {
+        //free names
+        if(i->next == NULL && i->prev == NULL)
+        {
+            *head = NULL;
+            free(i->data.name);
+            free(i);
+        }
+        else if(i->next == NULL)
+        {
+            i->prev->next = NULL;
+            free(i->data.name);
+            free(i);
+        }
+        else if(i->prev == NULL)
+        {
+            *head = i->next;
+            i->next->prev = NULL;
+            free(i->data.name);
+            free(i);
+        }
+        else
+        {
+            Fisier *q = i->prev;
+            q->next = i->next;
+            i->next->prev = q;
+            free(i->data.name);
+            free(i);
+        }
+    }
+}
 int main()
 {
     Folder *root,*you;
@@ -210,6 +253,10 @@ int main()
         {
             pwd(you);
             printf("\n");
+        }
+        else if(strcmp(comanda,"rm") == 0)
+        {
+            rm(&(you->data.fisiernext),argument);
         }
         else
         {
