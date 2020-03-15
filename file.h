@@ -12,7 +12,7 @@ typedef struct Directory {
     struct folder *subDirector;
 
     // The parent directory of the current directory (NULL for the root directory)
-    struct Directory *parentDir;
+    struct folder *parentDir;
 
     // Next directory on the same level of the hierarchy ()
 } Directory;
@@ -28,7 +28,7 @@ typedef struct File {
     char *data;
 
     // The directory in which the file is located
-    Directory *dir;
+    struct folder *dir;
 } File;
 
 typedef struct folder

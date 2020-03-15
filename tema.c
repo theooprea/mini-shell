@@ -68,10 +68,11 @@ void ls(Folder *you)
     print_folderlist(you->data.subDirector);
     printf("\n");
 }
-void touch(Fisier **head, char *argument)
+void touch(Fisier **head, char *argument, Folder *you)
 {
     Fisier *fisiernou = new_file(argument);
-    if((*head) == NULL)
+    fisiernou->data.dir = you;
+    if((*head) == NULL || strcmp(fisiernou->data.name,(*head)->data.name) < 0)
     {
         fisiernou->next = *head;
         *head = fisiernou;
@@ -79,18 +80,29 @@ void touch(Fisier **head, char *argument)
     else
     {
         Fisier *i = *head;
-        while(i->next)
+        while(i->next && strcmp(fisiernou->data.name,i->next->data.name) > 0)
         {
             i = i->next;
         }
-        i->next = fisiernou;
-        fisiernou->prev = i;
+        if(i->next != NULL)
+        {
+            fisiernou->next = i->next;
+            fisiernou->prev = i;
+            i->next->prev = fisiernou;
+            i->next = fisiernou;
+        }
+        else
+        {
+            i->next = fisiernou;
+            fisiernou->prev = i;
+        }
     }
 }
-void mkdir(Folder **head, char *argument)
+void mkdir(Folder **head, char *argument, Folder *you)
 {
     Folder *foldernou = new_folder(argument);
-    if((*head) == NULL)
+    foldernou->data.parentDir = you;
+    if((*head) == NULL || strcmp(foldernou->data.name,(*head)->data.name) < 0)
     {
         foldernou->next = *head;
         *head = foldernou;
@@ -98,12 +110,60 @@ void mkdir(Folder **head, char *argument)
     else
     {
         Folder *i = *head;
-        while(i->next)
+        while(i->next && strcmp(foldernou->data.name,i->next->data.name) > 0)
         {
             i = i->next;
         }
-        i->next = foldernou;
-        foldernou->prev = i;
+        if(i->next != NULL)
+        {
+            foldernou->next = i->next;
+            foldernou->prev = i;
+            i->next->prev = foldernou;
+            i->next = foldernou;
+        }
+        else
+        {
+            i->next = foldernou;
+            foldernou->prev = i;
+        }
+    }
+}
+void cd(Folder **you, char *argument)
+{
+    if(strcmp(argument,"..") == 0)
+    {
+        if((*you)->data.parentDir == NULL)
+        {
+            return;
+        }
+        else
+        {
+            *you = (*you)->data.parentDir;   
+        }
+    }
+    else
+    {
+        Folder *p = (*you)->data.subDirector;
+        while(p != NULL && strcmp(p->data.name,argument) != 0)
+        {
+            p = p->next;
+        }
+        if(p == NULL)
+        {
+            printf("Cannot move to %s: No such directory!",argument);
+        }
+        else
+        {
+            (*you) = p;   
+        }
+    }
+}
+void pwd(Folder *you)
+{
+    if(you->data.parentDir != NULL)
+    {
+        pwd(you->data.parentDir);
+        printf("/%s",you->data.name);
     }
 }
 int main()
@@ -132,15 +192,24 @@ int main()
         }
         else if(strcmp(comanda,"touch") == 0)
         {
-            touch(&(you->data.fisiernext),argument);
+            touch(&(you->data.fisiernext),argument,you);
         }
         else if(strcmp(comanda,"mkdir") == 0)
         {
-            mkdir(&(you->data.subDirector),argument);
+            mkdir(&(you->data.subDirector),argument,you);
+        }
+        else if(strcmp(comanda,"cd") == 0)
+        {
+            cd(&you,argument);
         }
         else if(strcmp(input,"ls") == 0)
         {
             ls(you);
+        }
+        else if(strcmp(input,"pwd") == 0)
+        {
+            pwd(you);
+            printf("\n");
         }
         else
         {
