@@ -1,29 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "file2.h"
-Folder * new_folder(char *name)
+#include "file.h"
+Folder *new_folder(char *name)
 {
     Folder *new_folder = malloc(sizeof(Folder));
     new_folder->next = NULL;
     new_folder->prev = NULL;
     new_folder->current = malloc(sizeof(Directory));
     new_folder->current->name = malloc((strlen(name)+1) * sizeof(char));
-    strcpy(new_folder->current->name,name);
+    strcpy(new_folder->current->name, name);
     new_folder->current->fisiernext = NULL;
     new_folder->current->parentDir = NULL;
     new_folder->current->subDirector = NULL;
     return new_folder;
 }
-Fisier * new_file(char *name)
+Fisier *new_file(char *name, char *content)
 {
     Fisier *new_file = malloc(sizeof(Fisier));
     new_file->next = NULL;
     new_file->prev = NULL;
     new_file->data = malloc(sizeof(File));
-    new_file->data->data = "\0";
+    new_file->data->data = malloc((strlen(content) + 1) * sizeof(char));
+    strcpy(new_file->data->data, content);
     new_file->data->name = malloc((strlen(name) + 1) * sizeof(char));
-    strcpy(new_file->data->name,name);
+    strcpy(new_file->data->name, name);
     new_file->data->size = strlen(name);
     new_file->data->dir = NULL;
     return new_file;
@@ -43,18 +44,18 @@ void delete_fs(Folder **root)
 void print_filelist(Fisier *head)
 {
     Fisier *i = head;
-    while(i != NULL)
+    while (i != NULL)
     {
-        printf("%s ",i->data->name);
+        printf("%s ", i->data->name);
         i = i->next;
     }
 }
 void print_folderlist(Folder *head)
 {
     Folder *i = head;
-    while(i != NULL)
+    while (i != NULL) 
     {
-        printf("%s ",i->current->name);
+        printf("%s ", i->current->name);
         i = i->next;
     }
 }
@@ -64,16 +65,20 @@ void ls(Folder *you)
     print_folderlist(you->current->subDirector);
     printf("\n");
 }
-void touch(Fisier **head, char *argument, Folder *you)
+void touch(Fisier **head, char *argument, Folder *you, char *input)
 {
-    Fisier *fisiernou = new_file(argument);
+    char *content;
+    content = strtok(input, " ");
+    content = strtok(NULL, " ");
+    content = strtok(NULL, " ");
+    Fisier *fisiernou = new_file(argument, content);
     fisiernou->data->dir = you->current;
-    if((*head) == NULL)
+    if ((*head) == NULL)
     {
         fisiernou->next = *head;
         *head = fisiernou;
     }
-    else if(strcmp(fisiernou->data->name,(*head)->data->name) < 0)
+    else if (strcmp(fisiernou->data->name, (*head)->data->name) < 0)
     {
         fisiernou->next = *head;
         (*head)->prev = fisiernou;
@@ -82,7 +87,7 @@ void touch(Fisier **head, char *argument, Folder *you)
     else
     {
         Fisier *i = *head;
-        while(i->next && strcmp(fisiernou->data->name,i->next->data->name) > 0)
+        while (i->next && strcmp(fisiernou->data->name, i->next->data->name) > 0)
         {
             i = i->next;
         }
@@ -104,12 +109,12 @@ void mkdir(Folder **head, char *argument, Folder *you)
 {
     Folder *foldernou = new_folder(argument);
     foldernou->current->parentDir = you->current;
-    if((*head) == NULL)
+    if ((*head) == NULL)
     {
         foldernou->next = *head;
         *head = foldernou;
     }
-    else if(strcmp(foldernou->current->name,(*head)->current->name) < 0)
+    else if (strcmp(foldernou->current->name, (*head)->current->name) < 0)
     {
         foldernou->next = *head;
         (*head)->prev = foldernou;
@@ -118,7 +123,7 @@ void mkdir(Folder **head, char *argument, Folder *you)
     else
     {
         Folder *i = *head;
-        while(i->next && strcmp(foldernou->current->name,i->next->current->name) > 0)
+        while(i->next && strcmp(foldernou->current->name, i->next->current->name) > 0)
         {
             i = i->next;
         }
@@ -138,16 +143,16 @@ void mkdir(Folder **head, char *argument, Folder *you)
 }
 void cd(Folder **you, char *argument, Folder *root)
 {
-    if(strcmp(argument,"..") == 0)
+    if (strcmp(argument, "..") == 0)
     {
-        if((*you)->current->parentDir == NULL)
+        if ((*you)->current->parentDir == NULL)
         {
             return;
         }
         else
         {
             Directory *aux = (*you)->current->parentDir;
-            if(strcmp(aux->name,"/") == 0)
+            if (strcmp(aux->name, "/") == 0)
             {
                 (*you) = root;
             }
@@ -166,13 +171,13 @@ void cd(Folder **you, char *argument, Folder *root)
     else
     {
         Folder *p = (*you)->current->subDirector;
-        while(p != NULL && strcmp(p->current->name,argument) != 0)
+        while (p != NULL && strcmp(p->current->name, argument) != 0)
         {
             p = p->next;
         }
-        if(p == NULL)
+        if (p == NULL)
         {
-            printf("Cannot move to '%s': No such directory!\n",argument);
+            printf("Cannot move to '%s': No such directory!\n", argument);
         }
         else
         {
@@ -182,44 +187,47 @@ void cd(Folder **you, char *argument, Folder *root)
 }
 void pwd(Directory *parent)
 {
-    if(parent->parentDir != NULL)
+    if (parent->parentDir != NULL)
     {
         pwd(parent->parentDir);
-        printf("/%s",parent->name);
+        printf("/%s", parent->name);
     }
 }
 void rm(Fisier **head, char *argument)
 {
     Fisier *i = *head;
-    while(i != NULL && strcmp(i->data->name,argument) != 0)
+    while (i != NULL && strcmp(i->data->name, argument) != 0)
     {
         i = i->next;
     }
-    if(i == NULL)
+    if (i == NULL)
     {
-        printf("Cannot remove '%s': No such file!\n",argument);
+        printf("Cannot remove '%s': No such file!\n", argument);
     }
     else
     {
         //free names
-        if(i->next == NULL && i->prev == NULL)
+        if (i->next == NULL && i->prev == NULL)
         {
             *head = NULL;
+            free(i->data->data);
             free(i->data->name);
             free(i->data);
             free(i);
         }
-        else if(i->next == NULL)
+        else if (i->next == NULL)
         {
             i->prev->next = NULL;
+            free(i->data->data);
             free(i->data->name);
             free(i->data);
             free(i);
         }
-        else if(i->prev == NULL)
+        else if (i->prev == NULL)
         {
             *head = i->next;
             i->next->prev = NULL;
+            free(i->data->data);
             free(i->data->name);
             free(i->data);
             free(i);
@@ -229,6 +237,7 @@ void rm(Fisier **head, char *argument)
             Fisier *q = i->prev;
             q->next = i->next;
             i->next->prev = q;
+            free(i->data->data);
             free(i->data->name);
             free(i->data);
             free(i);
@@ -237,12 +246,12 @@ void rm(Fisier **head, char *argument)
 }
 int taburi_necesare(Folder *you, char *rootname)
 {
-    if(strcmp(you->current->name,rootname) == 0)
+    if (strcmp(you->current->name, rootname) == 0)
         return 0;
 
     int number_of_tabs = 1;
     Directory *aux = you->current->parentDir;
-    while(strcmp(aux->name,rootname) != 0)
+    while(strcmp(aux->name, rootname) != 0)
     {
         number_of_tabs++;
         aux = aux->parentDir;
@@ -251,46 +260,47 @@ int taburi_necesare(Folder *you, char *rootname)
 }
 void print_sub_filelist(Folder *you, char *rootname)
 {
-    int spaces = (taburi_necesare(you,rootname) + 1) * 4;
+    int spaces = (taburi_necesare(you, rootname) + 1) * 4;
     Fisier *i = you->current->fisiernext;
-    while(i)
+    while (i)
     {
         int spaces_aux = spaces;
-        while(spaces_aux > 0)
+        while (spaces_aux > 0)
         {
             printf(" ");
             spaces_aux--;
         }
-        printf("%s\n",i->data->name);
+        printf("%s\n", i->data->name);
         i = i->next;
     }
 }
 void tree(Folder *root, char *rootname, int level_of_current_root)
 {
     int spaces = taburi_necesare(root,rootname) * 4;
-    while(spaces > 0)
+    while (spaces > 0)
     {
         printf(" ");
         spaces--;
     }
-    printf("%s\n",root->current->name);
-    print_sub_filelist(root,rootname);
-    if(root->current->subDirector != NULL)
+    printf("%s\n", root->current->name);
+    print_sub_filelist(root, rootname);
+    if (root->current->subDirector != NULL)
     {
-        tree(root->current->subDirector,rootname,level_of_current_root);
+        tree(root->current->subDirector, rootname, level_of_current_root);
     }
-    if(root->next != NULL && level_of_current_root != taburi_necesare(root->next,"/"))
+    if (root->next != NULL && level_of_current_root != taburi_necesare(root->next,"/"))
     {
-        tree(root->next,rootname,level_of_current_root);
+        tree(root->next, rootname, level_of_current_root);
     }
 }
 void free_filelist(Fisier **head)
 {
     Fisier *aux;
-    while((*head) != NULL)
+    while ((*head) != NULL)
     {
         aux = *head;
         *head = (*head)->next;
+        free(aux->data->data);
         free(aux->data->name);
         free(aux->data);
         free(aux);
@@ -299,7 +309,7 @@ void free_filelist(Fisier **head)
 void remove_single_directory(Folder **you)
 {
     Folder *i = *you;
-    if(i->next == NULL && i->prev == NULL)
+    if (i->next == NULL && i->prev == NULL)
     {
         i->current->parentDir->subDirector = NULL;
         free_filelist(&(i->current->fisiernext));
@@ -307,7 +317,7 @@ void remove_single_directory(Folder **you)
         free(i->current);
         free(i);
     }
-    else if(i->next == NULL)
+    else if (i->next == NULL)
     {
         i->prev->next = NULL;
         free_filelist(&(i->current->fisiernext));
@@ -315,7 +325,7 @@ void remove_single_directory(Folder **you)
         free(i->current);
         free(i);
     }
-    else if(i->prev == NULL)
+    else if (i->prev == NULL)
     {
         i->current->parentDir->subDirector = i->next;
         i->next->prev = NULL;
@@ -337,11 +347,11 @@ void remove_single_directory(Folder **you)
 }
 void rmdir(Folder *current)
 {
-    if(current->next != NULL)
+    if (current->next != NULL)
     {
         rmdir(current->next);
     }
-    if(current->current->subDirector != NULL)
+    if (current->current->subDirector != NULL)
     {
         rmdir(current->current->subDirector);
     }
@@ -350,17 +360,17 @@ void rmdir(Folder *current)
 void rmdir_aux(Folder **you, char *argument)
 {
     Folder *i = (*you)->current->subDirector;
-    while(i != NULL && strcmp(i->current->name,argument) != 0)
+    while (i != NULL && strcmp(i->current->name, argument) != 0)
     {
         i = i->next;
     }
-    if(i == NULL)
+    if (i == NULL)
     {
-        printf("Cannot remove '%s': No such directory!\n",argument);
+        printf("Cannot remove '%s': No such directory!\n", argument);
     }
     else
     {
-        if(i->current->subDirector == NULL)
+        if (i->current->subDirector == NULL)
         {
             remove_single_directory(&i);
         }
@@ -371,70 +381,68 @@ void rmdir_aux(Folder **you, char *argument)
         }
     }
 }
-int main()
+int main(void)
 {
-    Folder *root,*you;
-    char input[100],copy[100];
-    char *comanda,*argument;
+    Folder *root, *you;
+    char input[100], copy[100];
+    char *comanda, *argument, *argument2;
     fgets(input, 100, stdin);
     input[strlen(input) - 1] = '\0';
-    while(strcmp(input,"stop") != 0)
+    while (strcmp(input, "stop") != 0)
     {
-        strcpy(copy,input);
-        comanda = strtok(copy," ");
-        //printf("%s\n",comanda);
-        argument = strtok(NULL," ");
-        //printf("%s\n",argument);
-        if(strcmp(input,"create fs") == 0)
+        strcpy(copy, input);
+        comanda = strtok(copy, " ");
+        argument = strtok(NULL, " ");    
+        if (strcmp(input, "create fs") == 0)
         {
             create_fs(&root);
             you = root;
         }
-        else if(strcmp(input,"delete fs") == 0)
+        else if (strcmp(input, "delete fs") == 0)
         {
             delete_fs(&root);
             break;
         }
-        else if(strcmp(comanda,"touch") == 0)
+        else if (strcmp(comanda, "touch") == 0)
         {
-            touch(&(you->current->fisiernext),argument,you);
+            touch(&(you->current->fisiernext), argument, you, input);
         }
-        else if(strcmp(comanda,"mkdir") == 0)
+        else if (strcmp(comanda, "mkdir") == 0)
         {
-            mkdir(&(you->current->subDirector),argument,you);
+            mkdir(&(you->current->subDirector), argument, you);
         }
-        else if(strcmp(comanda,"cd") == 0)
+        else if (strcmp(comanda, "cd") == 0)
         {
-            cd(&you,argument,root);
+            cd(&you, argument, root);
         }
-        else if(strcmp(input,"ls") == 0)
+        else if (strcmp(input, "ls") == 0)
         {
             ls(you);
         }
-        else if(strcmp(input,"pwd") == 0)
+        else if (strcmp(input, "pwd") == 0)
         {
-            if(strcmp(you->current->name,"/") != 0)
+            if (strcmp(you->current->name, "/") != 0)
             {
                 pwd(you->current->parentDir);
-                printf("/%s\n",you->current->name);
+                printf("/%s\n", you->current->name);
             }
             else
             {
                 printf("/\n");
             }
         }
-        else if(strcmp(input,"tree") == 0)
+        else if (strcmp(input, "tree") == 0)
         {
-            int level_from_root = taburi_necesare(you,"/");
-            tree(you,you->current->name,level_from_root);
+            int level_from_root = taburi_necesare(you, "/");
+            tree(you, you->current->name, level_from_root);
         }
-        else if(strcmp(comanda,"rm") == 0)
+        else if (strcmp(comanda, "rm") == 0)
         {
-            rm(&(you->current->fisiernext),argument);
+            rm(&(you->current->fisiernext), argument);
         }
-        else if(strcmp(comanda,"rmdir") == 0)
+        else if (strcmp(comanda, "rmdir") == 0)
         {
-            rmdir_aux(&you,argument);
+            rmdir_aux(&you, argument);
         }
         fgets(input, 100, stdin);
         input[strlen(input) - 1] = '\0';
