@@ -68,9 +68,15 @@ void touch(Fisier **head, char *argument, Folder *you)
 {
     Fisier *fisiernou = new_file(argument);
     fisiernou->data->dir = you->current;
-    if((*head) == NULL || strcmp(fisiernou->data->name,(*head)->data->name) < 0)
+    if((*head) == NULL)
     {
         fisiernou->next = *head;
+        *head = fisiernou;
+    }
+    else if(strcmp(fisiernou->data->name,(*head)->data->name) < 0)
+    {
+        fisiernou->next = *head;
+        (*head)->prev = fisiernou;
         *head = fisiernou;
     }
     else
@@ -98,9 +104,15 @@ void mkdir(Folder **head, char *argument, Folder *you)
 {
     Folder *foldernou = new_folder(argument);
     foldernou->current->parentDir = you->current;
-    if((*head) == NULL || strcmp(foldernou->current->name,(*head)->current->name) < 0)
+    if((*head) == NULL)
     {
         foldernou->next = *head;
+        *head = foldernou;
+    }
+    else if(strcmp(foldernou->current->name,(*head)->current->name) < 0)
+    {
+        foldernou->next = *head;
+        (*head)->prev = foldernou;
         *head = foldernou;
     }
     else
@@ -338,13 +350,13 @@ void rmdir(Folder *current)
 void rmdir_aux(Folder **you, char *argument)
 {
     Folder *i = (*you)->current->subDirector;
-    while(i!= NULL && strcmp(i->current->name,argument) != 0)
+    while(i != NULL && strcmp(i->current->name,argument) != 0)
     {
         i = i->next;
     }
     if(i == NULL)
     {
-        printf("Cannot remove ​ ‘%s’​ : No such directory!",argument);
+        printf("Cannot remove '%s': No such directory!\n",argument);
     }
     else
     {
