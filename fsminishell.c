@@ -272,6 +272,93 @@ void tree(Folder *root, char *rootname, int level_of_current_root)
         tree(root->next,rootname,level_of_current_root);
     }
 }
+void free_filelist(Fisier **head)
+{
+    Fisier *aux;
+    while((*head) != NULL)
+    {
+        aux = *head;
+        *head = (*head)->next;
+        free(aux->data->name);
+        free(aux->data);
+        free(aux);
+    }
+}
+void remove_single_directory(Folder **you)
+{
+    Folder *i = *you;
+    if(i->next == NULL && i->prev == NULL)
+    {
+        i->current->parentDir->subDirector = NULL;
+        free_filelist(&(i->current->fisiernext));
+        free(i->current->name);
+        free(i->current);
+        free(i);
+    }
+    else if(i->next == NULL)
+    {
+        i->prev->next = NULL;
+        free_filelist(&(i->current->fisiernext));
+        free(i->current->name);
+        free(i->current);
+        free(i);
+    }
+    else if(i->prev == NULL)
+    {
+        i->current->parentDir->subDirector = i->next;
+        i->next->prev = NULL;
+        free_filelist(&(i->current->fisiernext));
+        free(i->current->name);
+        free(i->current);
+        free(i);
+    }
+    else
+    {
+        Folder *q = i->prev;
+        q->next = i->next;
+        i->next->prev = q;
+        free_filelist(&(i->current->fisiernext));
+        free(i->current->name);
+        free(i->current);
+        free(i);
+    }
+}
+void rmdir(Folder *current)
+{
+    if(current->next != NULL)
+    {
+        rmdir(current->next);
+    }
+    if(current->current->subDirector != NULL)
+    {
+        rmdir(current->current->subDirector);
+    }
+    remove_single_directory(&current);
+}
+void rmdir_aux(Folder **you, char *argument)
+{
+    Folder *i = (*you)->current->subDirector;
+    while(i!= NULL && strcmp(i->current->name,argument) != 0)
+    {
+        i = i->next;
+    }
+    if(i == NULL)
+    {
+        printf("Cannot remove ​ ‘%s’​ : No such directory!",argument);
+    }
+    else
+    {
+        if(i->current->subDirector == NULL)
+        {
+            remove_single_directory(&i);
+        }
+        else
+        {
+            rmdir(i->current->subDirector);
+            remove_single_directory(&i);   
+        }
+    }
+}
 int main()
 {
     Folder *root,*you;
@@ -333,10 +420,10 @@ int main()
         {
             rm(&(you->current->fisiernext),argument);
         }
-        /*else
+        else if(strcmp(comanda,"rmdir") == 0)
         {
-            printf("error! command %s not found\n",input);
-        }*/
+            rmdir_aux(&you,argument);
+        }
         fgets(input, 100, stdin);
         input[strlen(input) - 1] = '\0';
     }
