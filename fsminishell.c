@@ -25,7 +25,7 @@ Fisier *new_file(char *name, char *content)
     strcpy(new_file->data->data, content);
     new_file->data->name = malloc((strlen(name) + 1) * sizeof(char));
     strcpy(new_file->data->name, name);
-    new_file->data->size = strlen(name);
+    new_file->data->size = strlen(content);
     new_file->data->dir = NULL;
     return new_file;
 }
@@ -381,11 +381,55 @@ void rmdir_aux(Folder **you, char *argument)
         }
     }
 }
+void seek_in_list(Folder *you, char *subcontent, int min_size, int max_size)
+{
+    Fisier *it = you->current->fisiernext;
+    while (it != NULL)
+    {
+        if (it->data->size >= min_size && it->data->size <= max_size && strstr(it->data->data, subcontent) != NULL)
+        {
+            printf("%s ", it->data->name);
+        }
+        it = it->next;
+    }
+}
+void find(Folder *you, char *subcontent, int max_depth, int min_size, int max_size, int depth_of_initial_folder)
+{
+    int depth_to_starting_level = taburi_necesare(you, "/") - depth_of_initial_folder;
+    seek_in_list(you, subcontent, min_size, max_size);
+    if (you->current->subDirector != NULL && depth_to_starting_level < max_depth)
+    {
+        find(you->current->subDirector, subcontent, max_depth, min_size, max_size, depth_of_initial_folder);
+    }
+    if (you->next != NULL)
+    {
+        find(you->next, subcontent, max_depth, min_size, max_size, depth_of_initial_folder);
+    }
+}
+void find_aux(Folder *you, char *input)
+{
+    char *argument,*argument2, *argument3, *argument4, *subcontent;
+    argument = strtok(input, " ");
+    argument2 = strtok(NULL, " ");
+    argument3 = strtok(NULL, " ");
+    argument4 = strtok(NULL, " ");
+    subcontent = strtok(NULL, " ");
+    int max_depth = atoi(argument2);
+    int min_size = atoi(argument3);
+    int max_size = atoi(argument4);
+    int depth_of_initial_folder = taburi_necesare(you, "/");
+    seek_in_list(you, subcontent, min_size, max_size);
+    if (max_depth > 0)
+    {
+        find(you->current->subDirector, subcontent, max_depth, min_size, max_size, depth_of_initial_folder);
+    }
+    printf("\n");
+}
 int main(void)
 {
     Folder *root, *you;
     char input[100], copy[100];
-    char *comanda, *argument, *argument2;
+    char *comanda, *argument;
     fgets(input, 100, stdin);
     input[strlen(input) - 1] = '\0';
     while (strcmp(input, "stop") != 0)
@@ -443,6 +487,10 @@ int main(void)
         else if (strcmp(comanda, "rmdir") == 0)
         {
             rmdir_aux(&you, argument);
+        }
+        else if (strcmp(comanda, "find") == 0)
+        {
+            find_aux(you,input);
         }
         fgets(input, 100, stdin);
         input[strlen(input) - 1] = '\0';

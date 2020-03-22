@@ -1,6 +1,18 @@
 #ifndef __FILE_H__
 #define __FILE_H__
 
+typedef struct folder {
+    struct Directory *current;
+    struct folder *next;
+    struct folder *prev;
+} Folder;
+
+typedef struct fisier {
+    struct File *data;
+    struct fisier *next;
+    struct fisier *prev;
+} Fisier;
+
 typedef struct Directory {
     // The name of the directory
     char *name;
@@ -12,7 +24,7 @@ typedef struct Directory {
     struct folder *subDirector;
 
     // The parent directory of the current directory (NULL for the root directory)
-    struct folder *parentDir;
+    struct Directory *parentDir;
 
     // Next directory on the same level of the hierarchy ()
 } Directory;
@@ -28,21 +40,7 @@ typedef struct File {
     char *data;
 
     // The directory in which the file is located
-    struct folder *dir;
+    struct Directory *dir;
 } File;
-
-typedef struct folder
-{
-    Directory data;
-    struct folder *next;
-    struct folder *prev;
-}Folder;
-
-typedef struct fisier
-{
-    File data;
-    struct fisier *next;
-    struct fisier *prev;
-}Fisier;
 
 #endif /* __FILE_H__ */
