@@ -1,0 +1,49 @@
+# mini-shell
+Oprea Theodor-Alin 314CC
+timp de lucru ~ 25-30h
+
+In fisierul file.h am introdus 2 structuri pentru a defini 2 tipuri de noduri
+de lista, una pentru folder care e nodul din lista de Directoare si una fisier
+care e nodul pt lista de File.
+
+In main am implementat mai multe functii care fie rezolva una din cerintele
+date sau sunt auxiliare la cele care chiar rezolva cerintele. In main am alocat
+static cateva siruri de caractere pentru a putea sa separ inputul in argumente
+pt comenzi. Apoi am pus conditia de cat timp comanda introdusa e diferita de
+stop se introduc comenzi iar daca se introduce comanda delete fs se face
+functia iar apoi se opreste bucla.
+
+Am facut 2 functii care creaza noduri pt listele fie de folder sau de fisier.
+Am rezolvat cerintele create fs, delete fs, touch, mkdir fara a utiliza alte
+functii auxiliare (fara a lua in calcul functiile new folder si new file), la
+celelate functii am facut alte functii auxiliare, precum ls in care am 2
+functii de afisare pt listele de foldere, respectiv fisiere. Am facut functii
+simplu recursive pt pwd de exemplu, dar si dublu recursive, pt tree, rmdir si
+find, in cadrul carora apelez functiile care sunt de fapt recursive.
+
+Pentru create fs am o functie care pur si simplu aloca un folder si ii da nume
+"/". Pentru delete fs dezaloca folderul "/". Pentru touch creez un nod de
+fisier pe care apoi il pun in lista in ordine lexicografica, procedeul fiind
+similar la mkdir, doar ca creez un nod pentru lista de foldere. Pentru ls am
+folosit 2 functii auxiliare care afiseaza listele pt fisiere respectiv foldere.
+Pentru pwd am o functie recursiva care afiseaza numele directorului parinte
+pana este null pointerul, punand si "/" sa fie formatul corect. Pentru cd caut
+in lista de subdirectoare directorul cu numele cerut si schimb pointerul you
+cu cel gasit, you fiind un handler ca sa ne putem plimba prin sistemul de
+fisiere iar daca se da ".." fac un pointer de tip Directory care merge in
+directorul bunic, apoi un pointer folder care cauta prin lista de foldere a
+Directorului bunic folderul cu numele parintelui folderului curent. Practic
+merg pana la bunic pt a avea acces la copii acestuia, implicit si parintele
+folderului unde ma aflu. Pt tree am o functie auxiliara iar cea recursiva se
+bazeaza pe o parcurgere recursiva a sub sistemului de fisiere care afiseaza ce
+se cere tinand cont de cate taburi trebuie sa puna (space-uri). Pt rm caut
+fisierul cu numele dat in lista de fisiere din folderul curent iar apoi refac
+legaturile dintre noduri in functie de caz. La rmdir este o logica asemanatoare
+cu rm doar ca am o functie recursiva si singurul caz in care sterg un folder
+anume este cand lista subdirectoarelor e vida. Pt find am o parcurgere
+recursiva in stilul celei de la rmdir, la care am adaugat conditia de maxdepth,
+parcurgand la fiecare nou folder lista de subfisiere din acel folder, iar in
+cazul in care gaseste cuvantul in continutul fisierului, il afiseaza.
+
+La coding style m-am folosit de checker si am rezolvat de mana fiecare eroare
+si warning care aparea in eroriStyle.txt
